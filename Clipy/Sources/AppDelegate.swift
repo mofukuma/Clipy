@@ -225,6 +225,7 @@ private extension AppDelegate {
             .share(replay: 1)
         observerScreenshot
             .subscribe(onNext: { [weak self] enabled in
+                NSLog("[Clipy] Screenshot observer setting changed: \(enabled)")
                 self?.screenshotObserver.isEnabled = enabled
             })
             .disposed(by: disposeBag)
@@ -232,12 +233,30 @@ private extension AppDelegate {
             .filter { $0 }
             .take(1)
             .subscribe(onNext: { [weak self] _ in
+                NSLog("[Clipy] Starting screenshot observer...")
                 self?.screenshotObserver.start()
+                NSLog("[Clipy] Screenshot observer started - monitoring Desktop folder")
+            })
+            .disposed(by: disposeBag)
+        // Observe Screenshot metadata items (for debugging)
+        screenshotObserver.rx.addedItem
+            .subscribe(onNext: { item in
+                NSLog("[Clipy] Screenshot metadata item detected:")
+                if let path = item.value(forAttribute: "kMDItemPath") as? String {
+                    NSLog("[Clipy]   - Path: \(path)")
+                }
+                if let displayName = item.value(forAttribute: kMDItemDisplayName as String) as? String {
+                    NSLog("[Clipy]   - Display Name: \(displayName)")
+                }
+                if let isScreenCapture = item.value(forAttribute: "kMDItemIsScreenCapture") as? Bool {
+                    NSLog("[Clipy]   - Is Screen Capture: \(isScreenCapture)")
+                }
             })
             .disposed(by: disposeBag)
         // Observe Screenshot image
         screenshotObserver.rx.addedImage
-            .subscribe(onNext: { image in
+            .subscribe(onNext: { [weak self] image in
+                NSLog("[Clipy] Screenshot image loaded - Size: \(image.size), Observer enabled: \(self?.screenshotObserver.isEnabled ?? false)")
                 AppEnvironment.current.clipService.create(with: image)
             })
             .disposed(by: disposeBag)

@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(defaults read com.clipy-app.Clipy kCPYBetaObserveScreenshot)",
+      "Bash(log show --predicate 'processImagePath contains \"\"Clipy\"\"' --last 5m --debug)"
+    ]
+  }
+}

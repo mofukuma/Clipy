@@ -36,5 +36,9 @@
 	<string>https://clipy-app.com/appcast.xml</string>
 	<key>SUPublicDSAKeyFile</key>
 	<string>dsa_pub.pem</string>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>Clipy needs access to your Desktop folder to detect and save screenshots to clipboard history.</string>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Clipy needs to send paste commands to other applications.</string>
 </dict>
 </plist>
