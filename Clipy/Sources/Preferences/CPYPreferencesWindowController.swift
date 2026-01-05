@@ -41,6 +41,10 @@ final class CPYPreferencesWindowController: NSWindowController {
     @IBOutlet private weak var shortcutsButton: NSButton!
     @IBOutlet private weak var updatesButton: NSButton!
     @IBOutlet private weak var betaButton: NSButton!
+    @IBOutlet private weak var pythonImageView: NSImageView?
+    @IBOutlet private weak var pythonTextField: NSTextField?
+    @IBOutlet private weak var pythonButton: NSButton?
+
     // ViewController
     private let viewController = [NSViewController(nibName: "CPYGeneralPreferenceViewController", bundle: nil),
                                   NSViewController(nibName: "CPYMenuPreferenceViewController", bundle: nil),
@@ -48,7 +52,8 @@ final class CPYPreferencesWindowController: NSWindowController {
                                   CPYExcludeAppPreferenceViewController(nibName: "CPYExcludeAppPreferenceViewController", bundle: nil),
                                   CPYShortcutsPreferenceViewController(nibName: "CPYShortcutsPreferenceViewController", bundle: nil),
                                   CPYUpdatesPreferenceViewController(nibName: "CPYUpdatesPreferenceViewController", bundle: nil),
-                                  CPYBetaPreferenceViewController(nibName: "CPYBetaPreferenceViewController", bundle: nil)]
+                                  CPYBetaPreferenceViewController(nibName: "CPYBetaPreferenceViewController", bundle: nil),
+                                  CPYPythonPreferenceViewController()]
 
     // MARK: - Window Life Cycle
     override func windowDidLoad() {
@@ -66,6 +71,7 @@ final class CPYPreferencesWindowController: NSWindowController {
         shortcutsButton.sendAction(on: .leftMouseDown)
         updatesButton.sendAction(on: .leftMouseDown)
         betaButton.sendAction(on: .leftMouseDown)
+        pythonButton?.sendAction(on: .leftMouseDown)
     }
 
     override func showWindow(_ sender: Any?) {
@@ -106,6 +112,7 @@ private extension CPYPreferencesWindowController {
         shortcutsImageView.image = Asset.prefShortcut.image
         updatesImageView.image = Asset.prefUpdate.image
         betaImageView.image = Asset.prefBeta.image
+        pythonImageView?.image = Asset.prefBeta.image // Pythonアイコン（暫定的にbetaを使用）
 
         generalTextField.textColor = ColorName.tabTitle.color
         menuTextField.textColor = ColorName.tabTitle.color
@@ -114,6 +121,7 @@ private extension CPYPreferencesWindowController {
         shortcutsTextField.textColor = ColorName.tabTitle.color
         updatesTextField.textColor = ColorName.tabTitle.color
         betaTextField.textColor = ColorName.tabTitle.color
+        pythonTextField?.textColor = ColorName.tabTitle.color
     }
 
     func selectedTab(_ index: Int) {
@@ -141,6 +149,9 @@ private extension CPYPreferencesWindowController {
         case 6:
             betaImageView.image = Asset.prefBetaOn.image
             betaTextField.textColor = ColorName.clipy.color
+        case 7:
+            pythonImageView?.image = Asset.prefBetaOn.image // Pythonアイコン（暫定的）
+            pythonTextField?.textColor = ColorName.clipy.color
         default: break
         }
     }

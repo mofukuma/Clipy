@@ -99,7 +99,8 @@ final class PythonEnvironmentDetector {
             if let versions = try? FileManager.default.contentsOfDirectory(atPath: versionsDir) {
                 for version in versions {
                     let versionPath = (versionsDir as NSString).appendingPathComponent(version)
-                    let pythonPath = (versionPath as NSString).appendingPathComponent("bin/python3")
+                    let binPath = (versionPath as NSString).appendingPathComponent("bin")
+                    let pythonPath = (binPath as NSString).appendingPathComponent("python3")
                     if FileManager.default.fileExists(atPath: pythonPath),
                        !seenPaths.contains(pythonPath) {
                         if let env = createEnvironment(path: pythonPath) {

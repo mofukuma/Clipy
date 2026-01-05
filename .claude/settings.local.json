@@ -8,7 +8,10 @@
       "Bash(osascript -e 'tell application \"\"System Events\"\" to tell process \"\"Clipy\"\" to if exists then quit')",
       "Bash(cat:*)",
       "Bash(xcodebuild:*)",
-      "Bash(open:*)"
+      "Bash(open:*)",
+      "Bash(ls:*)",
+      "Bash(carthage update:*)",
+      "Bash(pod install:*)"
     ]
   }
 }
