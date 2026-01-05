@@ -20,6 +20,7 @@ struct Constants {
         #else
             static let name = "Clipy"
         #endif
+
         static let appcastURL = URL(string: "https://clipy-app.com/appcast.xml")!
     }
 
@@ -46,7 +47,7 @@ struct Constants {
         static let inputPasteCommand = "kCPYPrefInputPasteCommandKey"
         static let showIconInTheMenu = "kCPYPrefShowIconInTheMenuKey"
         static let numberOfItemsPlaceInline = "kCPYPrefNumberOfItemsPlaceInlineKey"
-        static let numberOfItemsPlaceInsideFolder  = "kCPYPrefNumberOfItemsPlaceInsideFolderKey"
+        static let numberOfItemsPlaceInsideFolder = "kCPYPrefNumberOfItemsPlaceInsideFolderKey"
         static let maxMenuItemTitleLength = "kCPYPrefMaxMenuItemTitleLengthKey"
         static let menuItemsTitleStartWithZero = "kCPYPrefMenuItemsTitleStartWithZeroKey"
         static let reorderClipsAfterPasting = "kCPYPrefReorderClipsAfterPasting"
@@ -83,6 +84,11 @@ struct Constants {
     struct Update {
         static let enableAutomaticCheck = "kCPYEnableAutomaticCheckKey"
         static let checkInterval = "kCPYUpdateCheckIntervalKey"
+    }
+
+    struct Python {
+        static let pythonPath = "com.clipy-app.Clipy.pythonPath"
+        static let pythonExecutionTimeout = "com.clipy-app.Clipy.pythonExecutionTimeout"
     }
 
     struct Notification {

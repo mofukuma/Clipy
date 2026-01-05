@@ -83,28 +83,36 @@ final class CPYClipData: NSObject {
         return NSImage.create(with: color, size: NSSize(width: 20, height: 20))
     }
 
+    static let availableTypesDictinary: [NSPasteboard.PasteboardType: String] = [
+        // String types
+        .deprecatedString: "String",
+
+        // Rich text types
+        .deprecatedRTF: "RTF",
+        .deprecatedRTFD: "RTFD",
+
+        // Document types
+        .deprecatedPDF: "PDF",
+
+        // File and URL types
+        .deprecatedFilenames: "Filenames",
+        .deprecatedURL: "URL",
+
+        // Image types - legacy
+        .deprecatedTIFF: "TIFF",
+
+        // Image types - modern
+        NSPasteboard.PasteboardType("public.tiff"): "TIFF",
+        NSPasteboard.PasteboardType("NeXT TIFF v4.0 pasteboard type"): "TIFF",
+        NSPasteboard.PasteboardType("public.png"): "TIFF"
+    ]
+
     static var availableTypes: [NSPasteboard.PasteboardType] {
-        return [.deprecatedString,
-                .deprecatedRTF,
-                .deprecatedRTFD,
-                .deprecatedPDF,
-                .deprecatedFilenames,
-                .deprecatedURL,
-                .deprecatedTIFF]
+        return Array(availableTypesDictinary.keys)
     }
+
     static var availableTypesString: [String] {
-        return ["String",
-                "RTF",
-                "RTFD",
-                "PDF",
-                "Filenames",
-                "URL",
-                "TIFF"]
-    }
-    static var availableTypesDictinary: [NSPasteboard.PasteboardType: String] {
-        var availableTypes = [NSPasteboard.PasteboardType: String]()
-        zip(CPYClipData.availableTypes, CPYClipData.availableTypesString).forEach { availableTypes[$0] = $1 }
-        return availableTypes
+        return Array(Set(availableTypesDictinary.values)).sorted()
     }
 
     // MARK: - Init
@@ -128,8 +136,13 @@ final class CPYClipData: NSObject {
             case .deprecatedURL:
                 guard let urls = pasteboard.propertyList(forType: .deprecatedURL) as? [String] else { return }
                 URLs = urls
-            case .deprecatedTIFF:
-                image = pasteboard.readObjects(forClasses: [NSImage.self], options: nil)?.first as? NSImage
+            case .deprecatedTIFF,
+                 NSPasteboard.PasteboardType("public.tiff"),
+                 NSPasteboard.PasteboardType("NeXT TIFF v4.0 pasteboard type"),
+                 NSPasteboard.PasteboardType("public.png"):
+                if image == nil {
+                    image = pasteboard.readObjects(forClasses: [NSImage.self], options: nil)?.first as? NSImage
+                }
             default: break
             }
         }

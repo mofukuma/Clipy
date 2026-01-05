@@ -120,8 +120,51 @@ class AppDelegate: NSObject, NSMenuItemValidation {
             NSSound.beep()
             return
         }
-        AppEnvironment.current.pasteService.copyToPasteboard(with: snippet.content)
-        AppEnvironment.current.pasteService.paste()
+
+        // Pythonスニペットかチェック
+        let pythonService = AppEnvironment.current.pythonService
+        if pythonService.isPythonSnippet(snippet.content) {
+            let code = pythonService.extractPythonCode(snippet.content)
+
+            // 非同期で実行してメインスレッドをブロックしない
+            DispatchQueue.global(qos: .userInitiated).async {
+                let result = pythonService.execute(code)
+
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let output):
+                        AppEnvironment.current.pasteService.copyToPasteboard(with: output)
+                        AppEnvironment.current.pasteService.paste()
+                    case .failure(let error):
+                        // エラーをユーザーに通知
+                        NSSound.beep()
+
+                        // エラーの詳細メッセージを生成
+                        var errorMessage = error.localizedDescription
+                        if let pythonError = error as? PythonExecutionError {
+                            switch pythonError {
+                            case .executionFailed(let details):
+                                errorMessage = "実行エラー:\n\n\(details)"
+                            }
+                        }
+
+                        CPYUtilities.sendCustomLog(with: "Python execution failed: \(errorMessage)")
+
+                        // エラーメッセージをアラート表示
+                        let alert = NSAlert()
+                        alert.messageText = "Pythonスニペット実行エラー"
+                        alert.informativeText = errorMessage
+                        alert.alertStyle = .warning
+                        alert.addButton(withTitle: "OK")
+                        alert.runModal()
+                    }
+                }
+            }
+        } else {
+            // 通常のスニペット処理
+            AppEnvironment.current.pasteService.copyToPasteboard(with: snippet.content)
+            AppEnvironment.current.pasteService.paste()
+        }
     }
 
     func terminateApplication() {
@@ -229,12 +272,15 @@ private extension AppDelegate {
             })
             .disposed(by: disposeBag)
         observerScreenshot
-            .filter { $0 }
-            .take(1)
-            .subscribe(onNext: { [weak self] _ in
-                self?.screenshotObserver.start()
+            .subscribe(onNext: { [weak self] enabled in
+                if enabled {
+                    self?.screenshotObserver.start()
+                } else {
+                    self?.screenshotObserver.stop()
+                }
             })
             .disposed(by: disposeBag)
+            
         // Observe Screenshot image
         screenshotObserver.rx.addedImage
             .subscribe(onNext: { image in

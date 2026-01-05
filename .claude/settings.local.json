@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(defaults read com.clipy-app.Clipy kCPYBetaObserveScreenshot)",
+      "Bash(log show --predicate 'processImagePath contains \"\"Clipy\"\"' --last 5m --debug)",
+      "Bash(defaults read:*)",
+      "Bash(log show:*)",
+      "Bash(osascript -e 'tell application \"\"System Events\"\" to tell process \"\"Clipy\"\" to if exists then quit')",
+      "Bash(cat:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(open:*)",
+      "Bash(ls:*)",
+      "Bash(carthage update:*)",
+      "Bash(pod install:*)",
+      "Bash(killall:*)",
+      "Bash(file:*)",
+      "Bash(plutil:*)",
+      "Bash(codesign:*)"
+    ]
+  }
+}

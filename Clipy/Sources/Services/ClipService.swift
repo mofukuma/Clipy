@@ -85,6 +85,10 @@ final class ClipService {
 // MARK: - Create Clip
 extension ClipService {
     fileprivate func create() {
+        createWithRetry(attempt: 0)
+    }
+
+    fileprivate func createWithRetry(attempt: Int) {
         lock.lock(); defer { lock.unlock() }
 
         // Store types
@@ -92,6 +96,15 @@ extension ClipService {
         // Pasteboard types
         let pasteboard = NSPasteboard.general
         let types = self.types(with: pasteboard)
+
+        // If clipboard is empty and this is first attempt, retry after a short delay
+        if types.isEmpty && attempt < 3 {
+            DispatchQueue.global(qos: .userInteractive).asyncAfter(deadline: .now() + .milliseconds(50)) { [weak self] in
+                self?.createWithRetry(attempt: attempt + 1)
+            }
+            return
+        }
+
         if types.isEmpty { return }
 
         // Excluded application
@@ -125,7 +138,7 @@ extension ClipService {
 
         // Overwrite same history
         let isOverwriteHistory = AppEnvironment.current.defaults.bool(forKey: Constants.UserDefaults.overwriteSameHistory)
-        let savedHash = (isOverwriteHistory) ? data.hash : Int(arc4random() % 1000000)
+        let savedHash = (isOverwriteHistory) ? data.hash : Int.random(in: 0..<1000000)
 
         // Saved time and path
         let unixTime = Int(Date().timeIntervalSince1970)
