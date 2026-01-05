@@ -85,6 +85,10 @@ final class ClipService {
 // MARK: - Create Clip
 extension ClipService {
     fileprivate func create() {
+        createWithRetry(attempt: 0)
+    }
+
+    fileprivate func createWithRetry(attempt: Int) {
         lock.lock(); defer { lock.unlock() }
 
         // Store types
@@ -92,6 +96,15 @@ extension ClipService {
         // Pasteboard types
         let pasteboard = NSPasteboard.general
         let types = self.types(with: pasteboard)
+
+        // If clipboard is empty and this is first attempt, retry after a short delay
+        if types.isEmpty && attempt < 3 {
+            DispatchQueue.global(qos: .userInteractive).asyncAfter(deadline: .now() + .milliseconds(50)) { [weak self] in
+                self?.createWithRetry(attempt: attempt + 1)
+            }
+            return
+        }
+
         if types.isEmpty { return }
 
         // Excluded application
@@ -107,10 +120,8 @@ extension ClipService {
     func create(with image: NSImage) {
         lock.lock(); defer { lock.unlock() }
 
-        NSLog("[Clipy] ClipService.create(with image:) called - Image size: \(image.size)")
         // Create only image data
         let data = CPYClipData(image: image)
-        NSLog("[Clipy] CPYClipData created for screenshot - Hash: \(data.hash)")
         save(with: data)
     }
 
@@ -118,21 +129,12 @@ extension ClipService {
         let realm = try! Realm()
         // Copy already copied history
         let isCopySameHistory = AppEnvironment.current.defaults.bool(forKey: Constants.UserDefaults.copySameHistory)
-        if realm.object(ofType: CPYClip.self, forPrimaryKey: "\(data.hash)") != nil, !isCopySameHistory {
-            NSLog("[Clipy] Clip already exists and copySameHistory is disabled - Hash: \(data.hash)")
-            return
-        }
+        if realm.object(ofType: CPYClip.self, forPrimaryKey: "\(data.hash)") != nil, !isCopySameHistory { return }
         // Don't save invalidated clip
-        if let clip = realm.object(ofType: CPYClip.self, forPrimaryKey: "\(data.hash)"), clip.isInvalidated {
-            NSLog("[Clipy] Clip is invalidated - Hash: \(data.hash)")
-            return
-        }
+        if let clip = realm.object(ofType: CPYClip.self, forPrimaryKey: "\(data.hash)"), clip.isInvalidated { return }
 
         // Don't save empty string history
-        if data.isOnlyStringType && data.stringValue.isEmpty {
-            NSLog("[Clipy] Skipping empty string clip")
-            return
-        }
+        if data.isOnlyStringType && data.stringValue.isEmpty { return }
 
         // Overwrite same history
         let isOverwriteHistory = AppEnvironment.current.defaults.bool(forKey: Constants.UserDefaults.overwriteSameHistory)
@@ -149,17 +151,13 @@ extension ClipService {
         clip.updateTime = unixTime
         clip.primaryType = data.primaryType?.rawValue ?? ""
 
-        NSLog("[Clipy] Saving clip - Hash: \(savedHash), Path: \(savedPath), PrimaryType: \(clip.primaryType)")
-
         DispatchQueue.main.async {
             // Save thumbnail image
             if let thumbnailImage = data.thumbnailImage {
-                NSLog("[Clipy] Saving thumbnail image to cache - Key: \(unixTime)")
                 PINCache.shared.setObjectAsync(thumbnailImage, forKey: "\(unixTime)", completion: nil)
                 clip.thumbnailPath = "\(unixTime)"
             }
             if let colorCodeImage = data.colorCodeImage {
-                NSLog("[Clipy] Saving color code image to cache - Key: \(unixTime)")
                 PINCache.shared.setObjectAsync(colorCodeImage, forKey: "\(unixTime)", completion: nil)
                 clip.thumbnailPath = "\(unixTime)"
                 clip.isColorCode = true
@@ -171,12 +169,7 @@ extension ClipService {
                     dispatchRealm.transaction {
                         dispatchRealm.add(clip, update: .all)
                     }
-                    NSLog("[Clipy] Successfully saved clip to Realm database - Hash: \(savedHash)")
-                } else {
-                    NSLog("[Clipy] ERROR: Failed to archive clip data to file: \(savedPath)")
                 }
-            } else {
-                NSLog("[Clipy] ERROR: Failed to prepare save path: \(CPYUtilities.applicationSupportFolder())")
             }
         }
     }

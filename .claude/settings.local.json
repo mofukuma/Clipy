@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(defaults read com.clipy-app.Clipy kCPYBetaObserveScreenshot)",
-      "Bash(log show --predicate 'processImagePath contains \"\"Clipy\"\"' --last 5m --debug)"
+      "Bash(log show --predicate 'processImagePath contains \"\"Clipy\"\"' --last 5m --debug)",
+      "Bash(defaults read:*)",
+      "Bash(log show:*)",
+      "Bash(osascript -e 'tell application \"\"System Events\"\" to tell process \"\"Clipy\"\" to if exists then quit')"
     ]
   }
 }
