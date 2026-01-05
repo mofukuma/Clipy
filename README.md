@@ -75,28 +75,28 @@ Python scripts can interact with clipboard history using the `clipy` object:
 
 ```python
 # python
-# Translate the most recent clipboard item from Japanese to English using ChatGPT
-import os
-from openai import OpenAI
+# Translate the most recent clipboard item to English using ChatGPT
+import os, json, urllib.request
 
-# Get API key from environment variable
-api_key = os.getenv("OPENAI_API_KEY", "your-api-key-here")
-client = OpenAI(api_key=api_key)
-
-# Get the most recent clipboard item
+api_key = os.getenv("OPENAI_API_KEY", "your api key")
 text = clipy.get_clip(0)
 
-# Call ChatGPT API
-response = client.chat.completions.create(
-    model="gpt-5.2",
-    messages=[
-        {"role": "system", "content": "Translate the following Japanese text to English:"},
-        {"role": "user", "content": text}
-    ]
+req = urllib.request.Request(
+    "https://api.openai.com/v1/chat/completions",
+    data=json.dumps({
+        "model": "gpt-5.2",
+        "messages": [
+            {"role": "system", "content": "You are a translator who translates text into English."},
+            {"role": "user", "content": f"Please translate the following text into English: {text}"}
+        ]
+    }).encode(),
+    headers={
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}"
+    }
 )
 
-# Output the translated text (will be pasted)
-print(response.choices[0].message.content)
+print(json.loads(urllib.request.urlopen(req).read())["choices"][0]["message"]["content"])
 ```
 
 #### Example: Data Processing
