@@ -120,8 +120,35 @@ class AppDelegate: NSObject, NSMenuItemValidation {
             NSSound.beep()
             return
         }
-        AppEnvironment.current.pasteService.copyToPasteboard(with: snippet.content)
-        AppEnvironment.current.pasteService.paste()
+
+        // Pythonスニペットかチェック
+        let pythonService = AppEnvironment.current.pythonService
+        if pythonService.isPythonSnippet(snippet.content) {
+            let code = pythonService.extractPythonCode(snippet.content)
+            let result = pythonService.execute(code)
+
+            switch result {
+            case .success(let output):
+                AppEnvironment.current.pasteService.copyToPasteboard(with: output)
+                AppEnvironment.current.pasteService.paste()
+            case .failure(let error):
+                // エラーをユーザーに通知
+                NSSound.beep()
+                CPYUtilities.sendCustomLog(with: "Python execution failed: \(error.localizedDescription)")
+
+                // エラーメッセージをアラート表示
+                let alert = NSAlert()
+                alert.messageText = "Pythonスニペット実行エラー"
+                alert.informativeText = error.localizedDescription
+                alert.alertStyle = .warning
+                alert.addButton(withTitle: "OK")
+                alert.runModal()
+            }
+        } else {
+            // 通常のスニペット処理
+            AppEnvironment.current.pasteService.copyToPasteboard(with: snippet.content)
+            AppEnvironment.current.pasteService.paste()
+        }
     }
 
     func terminateApplication() {

@@ -86,6 +86,11 @@ struct Constants {
         static let checkInterval = "kCPYUpdateCheckIntervalKey"
     }
 
+    struct Python {
+        static let pythonPath = "com.clipy-app.Clipy.pythonPath"
+        static let pythonExecutionTimeout = "com.clipy-app.Clipy.pythonExecutionTimeout"
+    }
+
     struct Notification {
         static let closeSnippetEditor = "kCPYSnippetEditorWillCloseNotification"
     }

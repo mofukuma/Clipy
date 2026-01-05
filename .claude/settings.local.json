@@ -5,7 +5,10 @@
       "Bash(log show --predicate 'processImagePath contains \"\"Clipy\"\"' --last 5m --debug)",
       "Bash(defaults read:*)",
       "Bash(log show:*)",
-      "Bash(osascript -e 'tell application \"\"System Events\"\" to tell process \"\"Clipy\"\" to if exists then quit')"
+      "Bash(osascript -e 'tell application \"\"System Events\"\" to tell process \"\"Clipy\"\" to if exists then quit')",
+      "Bash(cat:*)",
+      "Bash(xcodebuild:*)",
+      "Bash(open:*)"
     ]
   }
 }

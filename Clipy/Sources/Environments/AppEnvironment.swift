@@ -43,6 +43,7 @@ struct AppEnvironment {
                      excludeAppService: ExcludeAppService = current.excludeAppService,
                      accessibilityService: AccessibilityService = current.accessibilityService,
                      menuManager: MenuManager = current.menuManager,
+                     pythonService: PythonExecutionService = current.pythonService,
                      defaults: UserDefaults = current.defaults) {
         push(environment: Environment(clipService: clipService,
                                       hotKeyService: hotKeyService,
@@ -51,6 +52,7 @@ struct AppEnvironment {
                                       excludeAppService: excludeAppService,
                                       accessibilityService: accessibilityService,
                                       menuManager: menuManager,
+                                      pythonService: pythonService,
                                       defaults: defaults))
     }
 
@@ -61,6 +63,7 @@ struct AppEnvironment {
                                excludeAppService: ExcludeAppService = current.excludeAppService,
                                accessibilityService: AccessibilityService = current.accessibilityService,
                                menuManager: MenuManager = current.menuManager,
+                               pythonService: PythonExecutionService = current.pythonService,
                                defaults: UserDefaults = current.defaults) {
         replaceCurrent(environment: Environment(clipService: clipService,
                                                 hotKeyService: hotKeyService,
@@ -69,6 +72,7 @@ struct AppEnvironment {
                                                 excludeAppService: excludeAppService,
                                                 accessibilityService: accessibilityService,
                                                 menuManager: menuManager,
+                                                pythonService: pythonService,
                                                 defaults: defaults))
     }
 
@@ -85,6 +89,7 @@ struct AppEnvironment {
                            excludeAppService: excludeAppService,
                            accessibilityService: current.accessibilityService,
                            menuManager: current.menuManager,
+                           pythonService: current.pythonService,
                            defaults: current.defaults)
     }
 
