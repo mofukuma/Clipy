@@ -77,9 +77,12 @@ final class PythonExecutionService {
         process.standardError = errorPipe
         process.standardInput = inputPipe
 
-        var outputBuffer = ""
         var errorBuffer = ""
-        var rpcQueue: [String] = []
+
+        // Pythonパスが存在するかチェック
+        if !FileManager.default.fileExists(atPath: pythonExecutablePath) {
+            return .failure(PythonExecutionError.executionFailed("Pythonが見つかりません: \(pythonExecutablePath)\n\n設定からPythonパスを確認してください。"))
+        }
 
         do {
             try process.run()
@@ -109,12 +112,14 @@ final class PythonExecutionService {
                 }
             }
 
-            // タイムアウト設定（30秒）
-            let timeout: TimeInterval = 30.0
+            // タイムアウト設定（10秒）
+            let timeout: TimeInterval = 10.0
+            var didTimeout = false
             let timeoutTimer = DispatchSource.makeTimerSource(queue: .global())
             timeoutTimer.schedule(deadline: .now() + timeout)
             timeoutTimer.setEventHandler {
                 if process.isRunning {
+                    didTimeout = true
                     process.terminate()
                 }
             }
@@ -134,14 +139,20 @@ final class PythonExecutionService {
                 options: .regularExpression
             ).trimmingCharacters(in: .whitespacesAndNewlines)
 
+            // タイムアウトの場合
+            if didTimeout {
+                return .failure(PythonExecutionError.executionFailed("実行がタイムアウトしました（5秒以内に完了しませんでした）"))
+            }
+
             if process.terminationStatus == 0 {
                 return .success(output.trimmingCharacters(in: .whitespacesAndNewlines))
             } else {
-                let error = cleanedError.isEmpty ? "Unknown error" : cleanedError
+                let error = cleanedError.isEmpty ? "Python実行エラー（終了コード: \(process.terminationStatus)）" : cleanedError
                 return .failure(PythonExecutionError.executionFailed(error))
             }
         } catch {
-            return .failure(error)
+            let errorMsg = "Pythonプロセスの起動に失敗しました:\n\n\(error.localizedDescription)\n\nPythonパス: \(pythonExecutablePath)"
+            return .failure(PythonExecutionError.executionFailed(errorMsg))
         }
     }
 
