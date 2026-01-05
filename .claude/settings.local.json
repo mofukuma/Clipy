@@ -12,7 +12,10 @@
       "Bash(ls:*)",
       "Bash(carthage update:*)",
       "Bash(pod install:*)",
-      "Bash(killall:*)"
+      "Bash(killall:*)",
+      "Bash(file:*)",
+      "Bash(plutil:*)",
+      "Bash(codesign:*)"
     ]
   }
 }

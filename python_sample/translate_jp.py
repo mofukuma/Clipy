@@ -1,11 +1,6 @@
 # python
-import requests
+import requestsÇ
 import json, os
-
-# Clipyから最新の履歴を取得
-text = """
-The implementation follows the same pattern as Anaconda and Miniconda detection, as you specified. Miniforge environments at ~/miniforge3 will now be properly detected and labeled in the Python preferences dropdown
-"""
 
 # OpenAI API設定
 api_key = os.getenv("OPENAI_API_KEY", "your api key")
