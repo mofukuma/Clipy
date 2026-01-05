@@ -11,7 +11,8 @@
       "Bash(open:*)",
       "Bash(ls:*)",
       "Bash(carthage update:*)",
-      "Bash(pod install:*)"
+      "Bash(pod install:*)",
+      "Bash(killall:*)"
     ]
   }
 }

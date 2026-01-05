@@ -26,36 +26,36 @@ final class PythonEnvironmentDetector {
 
     // MARK: - Properties
 
-    /// Python実行ファイルを検索する候補パス
-    private static let searchPaths = [
-        // システムPython
+    /// Python実行ファイルを検索する固定パス
+    private static let fixedSearchPaths = [
+        // システムPython（固定）
         "/usr/bin/python3",
-        "/usr/local/bin/python3",
+        "/usr/bin/python",
 
-        // Homebrew (Intel Mac)
-        "/usr/local/bin/python3.11",
-        "/usr/local/bin/python3.12",
-        "/usr/local/bin/python3.13",
+        // Homebrew (固定パス)
+        "/usr/local/bin/python3",           // Intel Mac
+        "/usr/local/bin/python",
+        "/opt/homebrew/bin/python3",        // Apple Silicon
+        "/opt/homebrew/bin/python",
 
-        // Homebrew (Apple Silicon)
-        "/opt/homebrew/bin/python3",
-        "/opt/homebrew/bin/python3.11",
-        "/opt/homebrew/bin/python3.12",
-        "/opt/homebrew/bin/python3.13",
-
-        // Anaconda
-        "~/anaconda3/bin/python",
+        // Anaconda/Miniconda/Miniforge (base環境)
         "~/anaconda3/bin/python3",
-        "~/miniconda3/bin/python",
+        "~/anaconda3/bin/python",
         "~/miniconda3/bin/python3",
+        "~/miniconda3/bin/python",
+        "~/miniforge3/bin/python3",
+        "~/miniforge3/bin/python",
 
         // pyenv
         "~/.pyenv/shims/python3",
+        "~/.pyenv/shims/python"
+    ]
 
-        // Python.org
-        "/Library/Frameworks/Python.framework/Versions/3.11/bin/python3",
-        "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3",
-        "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3"
+    /// conda仮想環境の検索対象ディレクトリ
+    private static let condaEnvsDirectories = [
+        "~/anaconda3/envs",
+        "~/miniconda3/envs",
+        "~/miniforge3/envs"
     ]
 
     // MARK: - Detection
@@ -65,30 +65,31 @@ final class PythonEnvironmentDetector {
         var environments: [PythonEnvironment] = []
         var seenPaths = Set<String>()
 
-        // 候補パスから検索
-        for path in searchPaths {
+        // 固定パスから検索
+        for path in fixedSearchPaths {
             let expandedPath = NSString(string: path).expandingTildeInPath
-
-            if FileManager.default.fileExists(atPath: expandedPath),
-               !seenPaths.contains(expandedPath) {
-                if let env = createEnvironment(path: expandedPath) {
-                    environments.append(env)
-                    seenPaths.insert(expandedPath)
-                }
-            }
+            addPythonIfExists(expandedPath, environments: &environments, seenPaths: &seenPaths)
         }
 
-        // PATHから追加検索
-        if let pathEnv = ProcessInfo.processInfo.environment["PATH"] {
-            let paths = pathEnv.components(separatedBy: ":")
-            for pathDir in paths {
-                let pythonPath = (pathDir as NSString).appendingPathComponent("python3")
-                if FileManager.default.fileExists(atPath: pythonPath),
-                   !seenPaths.contains(pythonPath) {
-                    if let env = createEnvironment(path: pythonPath) {
-                        environments.append(env)
-                        seenPaths.insert(pythonPath)
-                    }
+        // conda仮想環境を検索
+        for envsDir in condaEnvsDirectories {
+            let expandedEnvsDir = NSString(string: envsDir).expandingTildeInPath
+            guard FileManager.default.fileExists(atPath: expandedEnvsDir) else { continue }
+
+            if let envNames = try? FileManager.default.contentsOfDirectory(atPath: expandedEnvsDir) {
+                for envName in envNames {
+                    // 隠しファイル/ディレクトリをスキップ
+                    if envName.hasPrefix(".") { continue }
+
+                    let envPath = (expandedEnvsDir as NSString).appendingPathComponent(envName)
+                    let binPath = (envPath as NSString).appendingPathComponent("bin")
+
+                    // bin/python3 と bin/python をチェック
+                    let python3Path = (binPath as NSString).appendingPathComponent("python3")
+                    let pythonPath = (binPath as NSString).appendingPathComponent("python")
+
+                    addPythonIfExists(python3Path, environments: &environments, seenPaths: &seenPaths)
+                    addPythonIfExists(pythonPath, environments: &environments, seenPaths: &seenPaths)
                 }
             }
         }
@@ -98,21 +99,51 @@ final class PythonEnvironmentDetector {
             let versionsDir = (pyenvRoot as NSString).appendingPathComponent("versions")
             if let versions = try? FileManager.default.contentsOfDirectory(atPath: versionsDir) {
                 for version in versions {
+                    // 隠しファイル/ディレクトリをスキップ
+                    if version.hasPrefix(".") { continue }
+
                     let versionPath = (versionsDir as NSString).appendingPathComponent(version)
                     let binPath = (versionPath as NSString).appendingPathComponent("bin")
-                    let pythonPath = (binPath as NSString).appendingPathComponent("python3")
-                    if FileManager.default.fileExists(atPath: pythonPath),
-                       !seenPaths.contains(pythonPath) {
-                        if let env = createEnvironment(path: pythonPath) {
-                            environments.append(env)
-                            seenPaths.insert(pythonPath)
-                        }
-                    }
+
+                    let python3Path = (binPath as NSString).appendingPathComponent("python3")
+                    let pythonPath = (binPath as NSString).appendingPathComponent("python")
+
+                    addPythonIfExists(python3Path, environments: &environments, seenPaths: &seenPaths)
+                    addPythonIfExists(pythonPath, environments: &environments, seenPaths: &seenPaths)
                 }
             }
         }
 
         return environments
+    }
+
+    /// Pythonパスが存在し、実行可能であれば環境リストに追加
+    private static func addPythonIfExists(_ pythonPath: String, environments: inout [PythonEnvironment], seenPaths: inout Set<String>) {
+        guard FileManager.default.fileExists(atPath: pythonPath) else { return }
+        guard FileManager.default.isExecutableFile(atPath: pythonPath) else { return }
+
+        // シンボリックリンクの実体パスを取得
+        let realPath: String
+        if let resolved = try? FileManager.default.destinationOfSymbolicLink(atPath: pythonPath) {
+            // 相対パスの場合は絶対パスに変換
+            if resolved.hasPrefix("/") {
+                realPath = resolved
+            } else {
+                let directory = (pythonPath as NSString).deletingLastPathComponent
+                realPath = (directory as NSString).appendingPathComponent(resolved)
+            }
+        } else {
+            realPath = pythonPath
+        }
+
+        // 既に登録済みの場合はスキップ
+        guard !seenPaths.contains(realPath) else { return }
+
+        // 環境を作成して追加
+        if let env = createEnvironment(path: pythonPath) {
+            environments.append(env)
+            seenPaths.insert(realPath)
+        }
     }
 
     // MARK: - Helper Methods
@@ -157,6 +188,19 @@ final class PythonEnvironmentDetector {
 
     /// 表示名を生成
     private static func generateDisplayName(path: String, version: String) -> String {
+        // conda仮想環境の判定（anaconda3/envs/*, miniconda3/envs/*, miniforge3/envs/*）
+        if path.contains("/envs/") {
+            if let envName = extractCondaEnvName(from: path) {
+                if path.contains("anaconda") {
+                    return "Anaconda (\(envName)) - Python \(version)"
+                } else if path.contains("miniconda") {
+                    return "Miniconda (\(envName)) - Python \(version)"
+                } else if path.contains("miniforge") {
+                    return "Miniforge (\(envName)) - Python \(version)"
+                }
+            }
+        }
+
         // パスから種類を判定
         if path.contains("/opt/homebrew/") {
             return "Homebrew (Apple Silicon) - Python \(version)"
@@ -166,6 +210,8 @@ final class PythonEnvironmentDetector {
             return "Anaconda - Python \(version)"
         } else if path.contains("miniconda") {
             return "Miniconda - Python \(version)"
+        } else if path.contains("miniforge") {
+            return "Miniforge - Python \(version)"
         } else if path.contains(".pyenv") {
             return "pyenv - Python \(version)"
         } else if path.contains("/Library/Frameworks/Python.framework") {
@@ -175,6 +221,16 @@ final class PythonEnvironmentDetector {
         } else {
             return "Python \(version) (\(path))"
         }
+    }
+
+    /// conda仮想環境名をパスから抽出
+    private static func extractCondaEnvName(from path: String) -> String? {
+        let components = path.components(separatedBy: "/")
+        if let envsIndex = components.firstIndex(of: "envs"),
+           envsIndex + 1 < components.count {
+            return components[envsIndex + 1]
+        }
+        return nil
     }
 
     /// pyenvのルートディレクトリを取得
