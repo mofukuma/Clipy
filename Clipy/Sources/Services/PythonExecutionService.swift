@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Cocoa
 import RealmSwift
 
 final class PythonExecutionService {
@@ -274,18 +275,61 @@ final class PythonExecutionService {
 
     /// テキストを履歴に追加
     private func addClip(text: String) -> Bool {
-        // クリップボードにテキストを設定
-        // ClipServiceが自動的にクリップボードの変更を監視して履歴に追加する
-        DispatchQueue.main.sync {
-            let pasteboard = NSPasteboard.general
-            pasteboard.clearContents()
-            pasteboard.setString(text, forType: .string)
+        // メインスレッドで実行（Realmの書き込みはメインスレッドから）
+        var success = false
+        let semaphore = DispatchSemaphore(value: 0)
+
+        DispatchQueue.main.async {
+            do {
+                let realm = try Realm()
+
+                // 一時的なNSPasteboardを作成してCPYClipDataを初期化
+                let tempPasteboard = NSPasteboard(name: .init("com.clipy.python.temp.\(UUID().uuidString)"))
+                tempPasteboard.clearContents()
+                tempPasteboard.setString(text, forType: .string)
+
+                // CPYClipDataを作成
+                let data = CPYClipData(pasteboard: tempPasteboard, types: [.string])
+
+                // ハッシュ値を計算
+                let hash = data.hash
+
+                // 保存パスを生成
+                let unixTime = Int(Date().timeIntervalSince1970)
+                let savedPath = CPYUtilities.applicationSupportFolder() + "/\(NSUUID().uuidString).data"
+
+                // CPYClipオブジェクトを作成
+                let clip = CPYClip()
+                clip.dataPath = savedPath
+                clip.title = String(text.prefix(10000))
+                clip.dataHash = "\(hash)"
+                clip.updateTime = unixTime
+                clip.primaryType = NSPasteboard.PasteboardType.string.rawValue
+
+                // データをファイルに保存
+                if CPYUtilities.prepareSaveToPath(CPYUtilities.applicationSupportFolder()) {
+                    if NSKeyedArchiver.archiveRootObject(data, toFile: savedPath) {
+                        // Realmに保存
+                        try realm.write {
+                            realm.add(clip, update: .all)
+                        }
+                        success = true
+                    }
+                }
+
+                // 一時的なPasteboardを解放
+                tempPasteboard.releaseGlobally()
+            } catch {
+                print("Error adding clip to Realm: \(error)")
+                success = false
+            }
+            semaphore.signal()
         }
 
-        // ClipServiceが変更を検出するまで少し待つ
-        Thread.sleep(forTimeInterval: 0.1)
+        // メインスレッドの処理完了を待つ（タイムアウト2秒）
+        _ = semaphore.wait(timeout: .now() + 2.0)
 
-        return true
+        return success
     }
 
     /// 履歴の総数を取得
