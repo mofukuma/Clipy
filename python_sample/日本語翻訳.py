@@ -10,8 +10,8 @@ req = urllib.request.Request(
     data=json.dumps({
         "model": "gpt-5.2",
         "messages": [
-            {"role": "system", "content": "You are a translator who translates text into English."},
-            {"role": "user", "content": f"Please translate the following text into English: {text}"}
+            {"role": "system", "content": "あなたは各種言語を日本語に翻訳する専門家です。"},
+            {"role": "user", "content": f"以下の文を日本語に翻訳してください: {text}"}
         ]
     }).encode(),
     headers={

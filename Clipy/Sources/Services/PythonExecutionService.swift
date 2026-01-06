@@ -346,15 +346,22 @@ final class PythonExecutionService {
         guard let firstLine = lines.first?.trimmingCharacters(in: .whitespaces) else {
             return false
         }
-        // 行頭が # python で始まるかチェック（大文字小文字区別なし）
-        return firstLine.lowercased().hasPrefix("# python") ||
-               firstLine.lowercased().hasPrefix("#python")
+
+        let lowercasedLine = firstLine.lowercased()
+
+        // コメント（#で始まる）かつ "python" が含まれる
+        // 例: # python, #python, #!/bin/bash python, # Python script
+        if lowercasedLine.hasPrefix("#") && lowercasedLine.contains("python") {
+            return true
+        }
+
+        return false
     }
 
     /// Pythonスニペットからコード部分を抽出
     func extractPythonCode(_ content: String) -> String {
         let lines = content.components(separatedBy: .newlines)
-        // 最初の行（# python）を除いたコードを返す
+        // 最初の行（# python や shebang）を除いたコードを返す
         return lines.dropFirst().joined(separator: "\n")
     }
 }
