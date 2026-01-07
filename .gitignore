@@ -154,3 +154,4 @@ build-iPhoneSimulator/
 # .rubocop-https?--*
 
 .claude
+release_dmg
