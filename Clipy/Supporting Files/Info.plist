@@ -27,7 +27,7 @@
 	<key>LSUIElement</key>
 	<true/>
 	<key>NSAppleEventsUsageDescription</key>
-	<string>Clipy needs to send paste commands to other applications.</string>
+	<string>ClipyAI needs to send paste commands to other applications.</string>
 	<key>NSDesktopFolderUsageDescription</key>
 	<string>Clipy needs access to your Desktop folder to detect and save screenshots to clipboard history.</string>
 	<key>NSHumanReadableCopyright</key>
