@@ -107,6 +107,19 @@ extension PasteService {
 
         let pasteboard = NSPasteboard.general
         let types = data.types
+
+        // Special handling for images - use writeObjects for proper format support
+        if let image = data.image, types.contains(where: { isImageType($0) }) {
+            pasteboard.clearContents()
+            pasteboard.writeObjects([image])
+
+            // Also set text if available
+            if !data.stringValue.isEmpty {
+                pasteboard.setString(data.stringValue, forType: .string)
+            }
+            return
+        }
+
         pasteboard.declareTypes(types, owner: nil)
         types.forEach { type in
             switch type {
@@ -129,11 +142,18 @@ extension PasteService {
                 let url = data.URLs
                 pasteboard.setPropertyList(url, forType: .deprecatedURL)
             case .deprecatedTIFF:
-                guard let image = data.image, let imageData = image.tiffRepresentation else { return }
-                pasteboard.setData(imageData, forType: .deprecatedTIFF)
+                // Handled by writeObjects above if image exists
+                break
             default: break
             }
         }
+    }
+
+    private func isImageType(_ type: NSPasteboard.PasteboardType) -> Bool {
+        return type == .deprecatedTIFF ||
+               type == NSPasteboard.PasteboardType("public.tiff") ||
+               type == NSPasteboard.PasteboardType("public.png") ||
+               type == NSPasteboard.PasteboardType("NeXT TIFF v4.0 pasteboard type")
     }
 }
 
