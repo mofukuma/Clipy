@@ -25,13 +25,9 @@ Clipy supports executing Python scripts from snippets, allowing you to automate 
 
 ### Setup
 
-1. Open Clipy Preferences (⌘,)
+1. Open Preferences
 2. Go to the "Python" tab
-3. Select your Python environment from the dropdown:
-   - System Python
-   - Homebrew (Intel/Apple Silicon)
-   - Anaconda/Miniconda/Miniforge (base or virtual environments)
-   - pyenv
+3. Select your Python environment from the dropdown
 4. Click "Test" to verify the Python environment is working
 
 ### Creating Python Snippets
@@ -86,26 +82,18 @@ req = urllib.request.Request(
 print(json.loads(urllib.request.urlopen(req).read())["choices"][0]["message"]["content"])
 ```
 
-#### Example: Data Processing
+#### Example: Date Today
 
 ```python
 # python
-# Extract email addresses from the most recent clipboard item
-import re
 
-text = clipy.get_clip(0)
-emails = re.findall(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', text)
+from datetime import datetime
 
-if emails:
-    print('\n'.join(emails))
-else:
-    print("No email addresses found")
+print(datetime.today().strftime("%Y/%m/%d"))
 ```
 
 ### Limitations
 - Maximum execution time: 10 seconds
-- Standard output is captured and pasted as the result
-- Errors are displayed in an alert dialog
 
 ### How to Build
 0. Move to the project root directory
@@ -131,4 +119,4 @@ Clipy is available under the MIT license. See the LICENSE file for more info.
 Icons are copyrighted by their respective authors.
 
 ### Special Thanks
-__Thank you for [@Econa77](https://github.com/Econa77),[@naotaka](https://github.com/naotaka)  who have published [Clipy](https://github.com/Econa77/Clipy),[ClipMenu](https://github.com/naotaka/ClipMenu) as OSS.__
+__Thank you for [@Econa77](https://github.com/Econa77), [@naotaka](https://github.com/naotaka)  who have published [Clipy](https://github.com/Econa77/Clipy), [ClipMenu](https://github.com/naotaka/ClipMenu) as OSS.__
