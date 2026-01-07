@@ -624,7 +624,7 @@
 					};
 				};
 			};
-			buildConfigurationList = FAC43DC11B35D8B100C06102 /* Build configuration list for PBXProject "Clipy" */;
+			buildConfigurationList = FAC43DC11B35D8B100C06102 /* Build configuration list for PBXProject "ClipyAI" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -1205,7 +1205,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		FAC43DC11B35D8B100C06102 /* Build configuration list for PBXProject "Clipy" */ = {
+		FAC43DC11B35D8B100C06102 /* Build configuration list for PBXProject "ClipyAI" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FAC43DE01B35D8B100C06102 /* Debug */,
