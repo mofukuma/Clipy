@@ -25,17 +25,19 @@ xcodebuild -workspace Clipy.xcworkspace \
            build
 
 ### 2. ビルドをコピー
-cp -R /Users/*/Library/Developer/Xcode/DerivedData/Clipy-*/Build/Products/Release/Clipy.app /Applications/Clipy+.app
+cp -R /Users/*/Library/Developer/Xcode/DerivedData/Clipy-*/Build/Products/Release/Clipy.app ./release_dmg/ClipyAI.app
 
-### 3. アドホック署名
-codesign --force --deep --sign - /Applications/Clipy+.app
+### 3. Applicationsスタティックリンク
+ln -s /Applications ./release_dmg/Applications
 
-### 4. 配布用ZIPを作成
-cd /Applications
-zip -r ~/Desktop/Clipy-Python-Edition.zip Clipy+.app
+### 4. アドホック署名
+codesign --force --deep --sign - ./release_dmg/ClipyAI.app
 
+
+### 5. 配布用ZIPを作成
+hdiutil create -volname "ClipyAI_1.0.1" -srcfolder ./release_dmg -ov -format UDZO ClipyAI_1.0.1.dmg && ls -lh ClipyAI_1.0.1.dmg 
 
 ## TODO
-現在、古いDSA署名方式を使用していますが、Sparkle 2.xはセキュリティ上の理由でEdDSA（ed25519）キーが必要らしい。
+現在、古いDSA署名方式を使用、Sparkle 2.xはセキュリティ上の理由でEdDSA（ed25519）キーが必要らしい。
 
 

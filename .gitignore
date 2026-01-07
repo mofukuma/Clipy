@@ -155,3 +155,4 @@ build-iPhoneSimulator/
 
 .claude
 release_dmg
+*.dmg
