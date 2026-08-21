@@ -14,6 +14,32 @@ clipy.add_clip("あたらしい内容") これでクリップボードに入れ�
 設定からPython環境を指定できるぞ。pip で好きなモジュールをいれて使おう。
 
 
+## Office（Excel等）の画像くっつき対策
+Excelでコピーすると、テキスト・RTF・HTML・セルの画像（TIFF）が同時にクリップボードに乗る。
+今までは画像だけを書き戻していたので、貼り付けると画像になってしまっていた。
+
+- 保存していた全表現を、元の順番のまま復元するようにした
+- 画像・PDFは「レンダリング結果」なので、テキストがある場合は必ず後ろに回す
+- Excel/Word/Numbers等のネイティブ形式（com.microsoft.* など）もそのまま保存・復元
+  → Excelに貼り戻すと画像ではなくセルとして貼れる
+- HTMLも保存対象に追加（RTFの設定と連動）
+
+画像が絶対に要らない人向けの隠し設定:
+defaults write com.progsha.ClipyAI kCPYPrefDropRenderedMediaOnRichText -bool true
+
+## クリップボード画像をPNG保存
+python_sample/クリップボード画像をPNG保存.py
+
+clipy.save_clip_image() でFinderで開いている（選択している）フォルダにPNG保存できる。
+その他 clipy.get_clip_image / find_image_clip / has_image /
+get_finder_path / get_finder_selection / reveal を追加。
+
+初回はFinder操作のオートメーション許可ダイアログが出る。
+（システム設定 > プライバシーとセキュリティ > オートメーション）
+
+Pythonスニペットは、printしなければ貼り付けもされないようにした。
+タイムアウトは10秒→30秒。
+
 ## ビルド周り
 色々とモジュール周りでエラー吐きまくるので　macOS 13.5以上 としたらなおった。
 

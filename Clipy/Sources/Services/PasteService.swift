@@ -105,56 +105,51 @@ extension PasteService {
             return
         }
 
+        copyToPasteboard(with: data)
+    }
+
+    /**
+     *  Restores every representation the clip was copied with.
+     *
+     *  Office applications put a rendered picture of the copied content on the
+     *  pasteboard next to the text itself. Writing the picture first - or writing
+     *  it alone - makes the receiving application paste a picture instead of the
+     *  copied cells or paragraphs, so the real content always comes first.
+     */
+    func copyToPasteboard(with data: CPYClipData) {
+        lock.lock(); defer { lock.unlock() }
+
+        let dropsRenderedMedia = AppEnvironment.current.defaults.bool(forKey: Constants.UserDefaults.dropRenderedMediaOnRichText)
+        // Application native formats come first, they carry the copied content
+        // in the very shape the source application understands
+        var contents = data.nativeTypes.compactMap { type -> (NSPasteboard.PasteboardType, CPYPasteboardContent)? in
+            guard let nativeData = data.nativeData[type.rawValue] else { return nil }
+            return (type, .data(nativeData))
+        }
+        // Resolve the payloads before declaring anything, a declared type
+        // without data makes the receiving application paste nothing at all
+        contents += data.pasteKinds(dropsRenderedMedia: dropsRenderedMedia)
+            .compactMap { kind -> (NSPasteboard.PasteboardType, CPYPasteboardContent)? in
+                guard let content = data.pasteboardContent(for: kind) else { return nil }
+                return (kind.canonicalType, content)
+            }
+        guard !contents.isEmpty else { return }
+
         let pasteboard = NSPasteboard.general
-        let types = data.types
-
-        // Special handling for images - use writeObjects for proper format support
-        if let image = data.image, types.contains(where: { isImageType($0) }) {
-            pasteboard.clearContents()
-            pasteboard.writeObjects([image])
-
-            // Also set text if available
-            if !data.stringValue.isEmpty {
-                pasteboard.setString(data.stringValue, forType: .string)
-            }
-            return
-        }
-
-        pasteboard.declareTypes(types, owner: nil)
-        types.forEach { type in
-            switch type {
-            case .deprecatedString:
-                let pbString = data.stringValue
-                pasteboard.setString(pbString, forType: .deprecatedString)
-            case .deprecatedRTFD:
-                guard let rtfData = data.RTFData else { return }
-                pasteboard.setData(rtfData, forType: .deprecatedRTFD)
-            case .deprecatedRTF:
-                guard let rtfData = data.RTFData else { return }
-                pasteboard.setData(rtfData, forType: .deprecatedRTF)
-            case .deprecatedPDF:
-                guard let pdfData = data.PDF, let pdfRep = NSPDFImageRep(data: pdfData) else { return }
-                pasteboard.setData(pdfRep.pdfRepresentation, forType: .deprecatedPDF)
-            case .deprecatedFilenames:
-                let fileNames = data.fileNames
-                pasteboard.setPropertyList(fileNames, forType: .deprecatedFilenames)
-            case .deprecatedURL:
-                let url = data.URLs
-                pasteboard.setPropertyList(url, forType: .deprecatedURL)
-            case .deprecatedTIFF:
-                // Handled by writeObjects above if image exists
-                break
-            default: break
+        pasteboard.clearContents()
+        pasteboard.declareTypes(contents.map { $0.0 }, owner: nil)
+        contents.forEach { type, content in
+            switch content {
+            case .string(let string):
+                pasteboard.setString(string, forType: type)
+            case .data(let payload):
+                pasteboard.setData(payload, forType: type)
+            case .propertyList(let propertyList):
+                pasteboard.setPropertyList(propertyList, forType: type)
             }
         }
     }
 
-    private func isImageType(_ type: NSPasteboard.PasteboardType) -> Bool {
-        return type == .deprecatedTIFF ||
-               type == NSPasteboard.PasteboardType("public.tiff") ||
-               type == NSPasteboard.PasteboardType("public.png") ||
-               type == NSPasteboard.PasteboardType("NeXT TIFF v4.0 pasteboard type")
-    }
 }
 
 // MARK: - Paste

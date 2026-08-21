@@ -44,6 +44,8 @@ struct AppEnvironment {
                      accessibilityService: AccessibilityService = current.accessibilityService,
                      menuManager: MenuManager = current.menuManager,
                      pythonService: PythonExecutionService = current.pythonService,
+                     finderService: FinderService = current.finderService,
+                     imageExportService: ClipImageExportService = current.imageExportService,
                      defaults: UserDefaults = current.defaults) {
         push(environment: Environment(clipService: clipService,
                                       hotKeyService: hotKeyService,
@@ -53,6 +55,8 @@ struct AppEnvironment {
                                       accessibilityService: accessibilityService,
                                       menuManager: menuManager,
                                       pythonService: pythonService,
+                                      finderService: finderService,
+                                      imageExportService: imageExportService,
                                       defaults: defaults))
     }
 
@@ -64,6 +68,8 @@ struct AppEnvironment {
                                accessibilityService: AccessibilityService = current.accessibilityService,
                                menuManager: MenuManager = current.menuManager,
                                pythonService: PythonExecutionService = current.pythonService,
+                               finderService: FinderService = current.finderService,
+                               imageExportService: ClipImageExportService = current.imageExportService,
                                defaults: UserDefaults = current.defaults) {
         replaceCurrent(environment: Environment(clipService: clipService,
                                                 hotKeyService: hotKeyService,
@@ -73,6 +79,8 @@ struct AppEnvironment {
                                                 accessibilityService: accessibilityService,
                                                 menuManager: menuManager,
                                                 pythonService: pythonService,
+                                                finderService: finderService,
+                                                imageExportService: imageExportService,
                                                 defaults: defaults))
     }
 
@@ -90,6 +98,8 @@ struct AppEnvironment {
                            accessibilityService: current.accessibilityService,
                            menuManager: current.menuManager,
                            pythonService: current.pythonService,
+                           finderService: current.finderService,
+                           imageExportService: current.imageExportService,
                            defaults: current.defaults)
     }
 

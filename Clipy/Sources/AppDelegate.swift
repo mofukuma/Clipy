@@ -133,8 +133,11 @@ class AppDelegate: NSObject, NSMenuItemValidation {
                 DispatchQueue.main.async {
                     switch result {
                     case .success(let output):
-                        AppEnvironment.current.pasteService.copyToPasteboard(with: output)
-                        AppEnvironment.current.pasteService.paste()
+                        // 何も出力しないスクリプト（画像保存など）は貼り付けない
+                        if !output.isEmpty {
+                            AppEnvironment.current.pasteService.copyToPasteboard(with: output)
+                            AppEnvironment.current.pasteService.paste()
+                        }
                     case .failure(let error):
                         // エラーをユーザーに通知
                         NSSound.beep()

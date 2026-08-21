@@ -69,6 +69,9 @@ struct Constants {
         static let excludeApplications = "kCPYExcludeApplications"
         static let collectCrashReport = "kCPYCollectCrashReport"
         static let showColorPreviewInTheMenu = "kCPYPrefShowColorPreviewInTheMenu"
+        /// Drops the rendered preview (TIFF / PDF) Office applications attach to
+        /// copied cells and paragraphs instead of only deprioritizing it.
+        static let dropRenderedMediaOnRichText = "kCPYPrefDropRenderedMediaOnRichText"
     }
 
     struct Beta {

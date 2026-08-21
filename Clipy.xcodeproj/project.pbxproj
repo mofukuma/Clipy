@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		0AFF00A52F0B733500FE55BB /* PythonExecutionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFF00A42F0B733500FE55BB /* PythonExecutionService.swift */; };
+		0AFF01212F0B740100FE55BB /* ClipImageExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFF01202F0B740100FE55BB /* ClipImageExportService.swift */; };
+		0AFF01112F0B740000FE55BB /* FinderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFF01102F0B740000FE55BB /* FinderService.swift */; };
 		0AFF00A92F0B735100FE55BB /* PythonEnvironmentDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFF00A72F0B735100FE55BB /* PythonEnvironmentDetector.swift */; };
 		0AFF00AB2F0B7BE100FE55BB /* CPYPythonPreferenceViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AFF00AA2F0B7BE100FE55BB /* CPYPythonPreferenceViewController.swift */; };
 		242EC2327861D35B7C3AE84E /* Pods_ClipyTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00A4B450122D7FCE6BD57E77 /* Pods_ClipyTests.framework */; };
@@ -111,6 +113,8 @@
 /* Begin PBXFileReference section */
 		00A4B450122D7FCE6BD57E77 /* Pods_ClipyTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ClipyTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		0AFF00A42F0B733500FE55BB /* PythonExecutionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PythonExecutionService.swift; sourceTree = "<group>"; };
+		0AFF01202F0B740100FE55BB /* ClipImageExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipImageExportService.swift; sourceTree = "<group>"; };
+		0AFF01102F0B740000FE55BB /* FinderService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinderService.swift; sourceTree = "<group>"; };
 		0AFF00A72F0B735100FE55BB /* PythonEnvironmentDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PythonEnvironmentDetector.swift; sourceTree = "<group>"; };
 		0AFF00AA2F0B7BE100FE55BB /* CPYPythonPreferenceViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CPYPythonPreferenceViewController.swift; sourceTree = "<group>"; };
 		1C2D23FF23B07B76585DC610 /* Pods-ClipyTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ClipyTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-ClipyTests/Pods-ClipyTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -298,6 +302,8 @@
 			isa = PBXGroup;
 			children = (
 				0AFF00A42F0B733500FE55BB /* PythonExecutionService.swift */,
+				0AFF01202F0B740100FE55BB /* ClipImageExportService.swift */,
+				0AFF01102F0B740000FE55BB /* FinderService.swift */,
 				FA0D5CE71DDCC61600AC9052 /* ClipService.swift */,
 				FAE911B81DE045E2008A4BEC /* HotKeyService.swift */,
 				FAC0DCE81DE15FD900309C49 /* DataCleanService.swift */,
@@ -825,6 +831,8 @@
 				FA1DB4B71DDCB452007F95C8 /* NSImage+Resize.swift in Sources */,
 				FA1DB4D51DDCB479007F95C8 /* CPYDraggedData.swift in Sources */,
 				0AFF00A52F0B733500FE55BB /* PythonExecutionService.swift in Sources */,
+				0AFF01212F0B740100FE55BB /* ClipImageExportService.swift in Sources */,
+				0AFF01112F0B740000FE55BB /* FinderService.swift in Sources */,
 				FA1DB5151DDCB4C0007F95C8 /* CPYExcludeAppPreferenceViewController.swift in Sources */,
 				FA1DB4EA1DDCB49C007F95C8 /* CPYSnippetsEditorCell.swift in Sources */,
 				0AFF00A92F0B735100FE55BB /* PythonEnvironmentDetector.swift in Sources */,

@@ -176,10 +176,18 @@ extension ClipService {
 
     private func types(with pasteboard: NSPasteboard) -> [NSPasteboard.PasteboardType] {
         let types = pasteboard.types?.filter { canSave(with: $0) } ?? []
-        return NSOrderedSet(array: types).array as? [NSPasteboard.PasteboardType] ?? []
+        let uniqueTypes = NSOrderedSet(array: types).array as? [NSPasteboard.PasteboardType] ?? []
+        // A native format is an addition to a clip, never a clip on its own
+        guard uniqueTypes.contains(where: { CPYPasteboardKind(type: $0) != nil }) else { return [] }
+        return uniqueTypes
     }
 
     private func canSave(with type: NSPasteboard.PasteboardType) -> Bool {
+        // Office and iWork put their own formats on the pasteboard. Keeping them
+        // is the only way to paste a copied cell range back as cells
+        if CPYClipData.isNativeDocumentType(type) {
+            return storeTypes[CPYClipData.nativeTypeStoreCategory]?.boolValue ?? false
+        }
         let dictionary = CPYClipData.availableTypesDictinary
         guard let value = dictionary[type] else { return false }
         guard let number = storeTypes[value] else { return false }

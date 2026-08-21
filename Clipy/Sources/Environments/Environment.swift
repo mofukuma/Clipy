@@ -23,6 +23,8 @@ struct Environment {
     let accessibilityService: AccessibilityService
     let menuManager: MenuManager
     let pythonService: PythonExecutionService
+    let finderService: FinderService
+    let imageExportService: ClipImageExportService
 
     let defaults: UserDefaults
 
@@ -35,6 +37,8 @@ struct Environment {
          accessibilityService: AccessibilityService = AccessibilityService(),
          menuManager: MenuManager = MenuManager(),
          pythonService: PythonExecutionService = PythonExecutionService(),
+         finderService: FinderService = FinderService(),
+         imageExportService: ClipImageExportService = ClipImageExportService(),
          defaults: UserDefaults = .standard) {
 
         self.clipService = clipService
@@ -45,6 +49,8 @@ struct Environment {
         self.accessibilityService = accessibilityService
         self.menuManager = menuManager
         self.pythonService = pythonService
+        self.finderService = finderService
+        self.imageExportService = imageExportService
         self.defaults = defaults
     }
 
